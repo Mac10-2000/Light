@@ -1,9 +1,21 @@
 #include <Streetlights.h>
 
- static void high(Light light);
- static void low(Light light);
- static void invert(Light light);
+ static void high(Light light);// turns on the Light
+ static void low(Light light);// turns off the Light
+ static void invert(Light light);// inverts the Light
 
+ static void high(Light light)
+{
+  light.high();
+}
+ static void low(Light light)
+{
+  light.low();
+}
+ static void invert(Light light)
+{
+  light.invert();
+}
 
 
 
@@ -37,12 +49,13 @@ Streetlights::Streetlights( Button *button, int time,Light *l1,Light *l2,Light *
 	_shutoffTime = 15  * 1000;
 	_lightPhase = 1000;
 	_flashPhase = 500;
+	_interruptTime=2000;
 
 	_idleMode = true;
 	_stopLight = false;
 	_shutoffBool = false;
 	_interruptRunning = false;
-	_lightMode = 0;
+	_lightMode = 1;
 	
 
 	
@@ -52,15 +65,27 @@ Streetlights::Streetlights( Button *button, int time,Light *l1,Light *l2,Light *
 	_phaseMax=0;
 
 }
-void Streetlights::setMaxPhase(int max){
-	assert(max<=5);
-	_phaseMax=max;
-}
+
 void Streetlights::setFlashlight(int light){
 	if(light>0&&light<=_numLights){
 	_flashlight=light;}
 }
-
+void Streetlights::setFlashtime(double time){
+	if(time>0){
+	_flashPhase=((int)(time*1000))/2;}
+}
+void Streetlights::setMaxPhase(int max){
+	assert(max<=5);
+	_phaseMax=max;
+}
+void Streetlights::setButtonDuration(int time){
+	if(time>0){
+	_interruptTime=time;}
+}
+void Streetlights::setShutoffTime(int time){
+	if(time>0){
+	_shutoffTime=time*1000;}
+}
 void Streetlights::setPhase(int time,int num,Light *l1,Light *l2,Light *l3 ) {
 
 
@@ -91,9 +116,13 @@ void Streetlights::setPhase(int time,int num,Light *l1,Light *l2,Light *l3 ) {
 
 	//_phaseMax=5;
 }
-
+void Streetlights::phaseFlash(int phase){
+	getPhase(phase).invertAll();
+}
+uint32_t Streetlights::getLightPhase(int mode){
+	return getPhase(mode).getdurration();
+}
 void Streetlights::lowAll(void){
-Serial.print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 	_l1->low();
 	if(_numLights>1){
 	_l2->low();
@@ -111,7 +140,7 @@ Serial.print("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&");
 	
 }
 void Streetlights::highAll(void){
-	_l1->high();	 Serial.print("////////////////////////////////////////////");
+	_l1->high();	
 	 if(_numLights>1){
 	_l2->high();
 	}
@@ -142,67 +171,56 @@ void Streetlights::invertAll(void){
 	}
 	
 }
-void Streetlights::phase(int phase){
-	getPhase(phase).invertAll();
+
+
+uint32_t Streetlights::light(int mode, uint32_t timer, uint32_t phase, bool stopLight) {	
+if(mode > -1){
+	_lightMode=mode;
 }
+if(timer > 0){
+	_lightTimer=timer;
+}Serial.println(phase);
+if(phase > 0){
+	_lightPhase=phase;
+	_stopLight=stopLight;Serial.println(_lightPhase);
+}
+Serial.println(stopLight);
+Serial.println(_stopLight);
 
-void Streetlights::light(void) {	 Serial.print("++++++++++++++++++++++++++++++++");
-	
+
+
+
+	if (millis() - _lightTimer > _lightPhase) {
   if (_stopLight) {
-	//  if(true){
+	
 	lowAll();
-  //high(phases[_lightMode]);
-
-    //_l1->low();
-  // _l2->low();
-   // _l3->low();
-   /* switch (_lightMode) {
-
-      case 0 :
-        _l1->high();
-        _lightMode++;
-        break;
-      case 1 :
-         _l1->high();
-        _l2->high();
-        _lightMode++;
-        break;
-      case 2 :
-      case 3:
-        _l3->high();
-        _lightMode++;
-        break;
-      case 4 :
-        _l2->high();
-        _lightMode++;
-        break;
-      case 5 :
-         _l1->high();
-        _lightMode++;
-        break;
-      default :
-         _l1->high();
-        _lightMode = 0;
- 
-        break;
-    }*/
     
 	getPhase(_lightMode).highAll();
 
-	_lightPhase=  getPhase(_lightMode).getdurration();Serial.print(_lightMode);
+	_lightPhase=  getPhase(_lightMode).getdurration();
 	_lightMode++;
 	
-	Serial.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 	if(_phaseMax<_lightMode)
 	{
 		_lightMode=1;
 	}
-	_shutoffTimer = millis();
+	
     _lightTimer = millis();
   }
+  _shutoffTimer = millis(); // shutoffTimer is reset every time the function is called, so that the Light doesn't shutoff while paused
+  
+	}
+	return _lightMode;
 }
 
-void Streetlights::flash(int light) {	 Serial.print("--------------------------------------");
+void Streetlights::flash(uint32_t timer, uint32_t phase,int light) {
+if(timer > 0){
+	_flashTimer=timer;
+}
+if(phase> 0){
+	_flashPhase=phase;
+}
+if (millis() - _flashTimer > _flashPhase) {	
 	if(light<0){
 		light=_flashlight;
 	}else{
@@ -240,9 +258,15 @@ void Streetlights::flash(int light) {	 Serial.print("---------------------------
 
   _flashTimer = millis();
 }
+}
 
-void Streetlights::shutoff(bool shutoffBool ) {
+uint32_t Streetlights::shutoff(bool shutoffBool , uint32_t timer) {
+
+	
+	_shutoffTimer=timer;	  	  
+	  
 	  _shutoffBool = shutoffBool;
+	  if (_shutoffBool) {
 	  lowAll();
  while (_shutoffBool && !(_button->read())) {
     delay(100);
@@ -252,9 +276,11 @@ void Streetlights::shutoff(bool shutoffBool ) {
   }
   _shutoffBool = false;
   _shutoffTimer = millis();
+	  }
+  return _shutoffTimer;
 }
 void Streetlights::shutoff(void ) {
-
+	  if (_shutoffBool) {
 	  lowAll();
  while (_shutoffBool && !(_button->read())) {
     delay(100);
@@ -264,6 +290,7 @@ void Streetlights::shutoff(void ) {
   }
   _shutoffBool = false;
   _shutoffTimer = millis();
+	  }
 }
 uint32_t Streetlights::readButton(void){
 	uint32_t buttonTimer = 0;
@@ -281,10 +308,11 @@ uint32_t Streetlights::readButton(void){
 }
 void Streetlights::control(uint32_t timer){
 	_interruptTimer = timer;
-	if (!_shutoffBool && _interruptTimer != 0) {
-      if (millis() - _interruptTimer > 2000) {
+	if( _interruptTimer != 0){
+	if (!_shutoffBool ) {
+      if (millis() - _interruptTimer > _interruptTime) {
         _idleMode = true;
-        _lightMode = 0;
+        _lightMode = 1;
         _stopLight = false;
       } else {
         _idleMode = false;
@@ -300,9 +328,17 @@ void Streetlights::control(uint32_t timer){
     _shutoffTimer = millis();
     _lightTimer = millis();
     _flashTimer = millis();
+	}
 }
 
-void Streetlights::runLight(void){
+void Streetlights::runLight(void){   
+
+    control(readButton());
+ 
+	lightOperation();
+	checkShutoff();
+}
+void Streetlights::runLightIntern(void){
 	
 	if ((_button->read())) {
     if (!_shutoffBool) {
@@ -314,9 +350,9 @@ void Streetlights::runLight(void){
     }
 
     if (!_shutoffBool && _interruptTimer != 0) {
-      if (millis() - _interruptTimer > 2000) {
+      if (millis() - _interruptTimer > _interruptTime) {
         _idleMode = true;
-        _lightMode = 0;
+        _lightMode = 1;
         _stopLight = false;
       } else {
         _idleMode = false;
@@ -334,13 +370,13 @@ void Streetlights::runLight(void){
     _flashTimer = millis();
 }  
   if (_idleMode) {
-    if (millis() - _flashTimer > _flashPhase) {
+    
       flash();
-    }
+    
   } else {
-    if (millis() - _lightTimer > _lightPhase) {
+    
       light();
-    }
+    
 
   }
   if (millis() - _shutoffTimer > _shutoffTime) {
@@ -353,13 +389,13 @@ void Streetlights::runLight(void){
 }
 void Streetlights::lightOperation(void){
 	  if (_idleMode) {
-    if (millis() - _flashTimer > _flashPhase) {
+    
       flash();
-    }
+    
   } else {
-    if (millis() - _lightTimer > _lightPhase) {
+    
       light();
-    }
+    
 
   }
 }
@@ -368,12 +404,12 @@ bool Streetlights::checkShutoff(void){
 	if (millis() - _shutoffTimer > _shutoffTime) {
     _shutoffBool = true;
   }
+    if (_shutoffBool) {
+    shutoff();
+  }
   return _shutoffBool;
 }
 
-void Streetlights::shutoffAfter(uint32_t shutoff = 15){
-	 _shutoffTime = shutoff * 1000;
-}
 
 Phase Streetlights::getPhase(int num)
 {
@@ -399,15 +435,3 @@ Phase Streetlights::getPhase(int num)
 }
 
 
- static void high(Light light)// inverts the pinstate of the pin used
-{
-  light.high();
-}
- static void low(Light light)// inverts the pinstate of the pin used
-{
-  light.low();
-}
- static void invert(Light light)// inverts the pinstate of the pin used
-{
-  light.invert();
-}

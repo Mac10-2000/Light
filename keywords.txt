@@ -1,19 +1,45 @@
 #######################################
-# Syntax Coloring Map For Arduino WiFi
+# Syntax Coloring Map For Light
 #######################################
 
 #######################################
 # Class (KEYWORD3)
 #######################################
 
+Light	KEYWORD3
+Button	KEYWORD3
+Phase	KEYWORD3
 Streetlights	KEYWORD3
 
 #######################################
 # Methods and Functions (KEYWORD2)
 #######################################
-example	KEYWORD2
+
+low	KEYWORD2
 invert	KEYWORD2
-invertRed	KEYWORD2
+high	KEYWORD2
+empty	KEYWORD2
+read	KEYWORD2
+lowAll	KEYWORD2
+highAll	KEYWORD2
+control	KEYWORD2
+shutoff	KEYWORD2
+light	KEYWORD2
+flash	KEYWORD2
+invertAll	KEYWORD2
+runLight	KEYWORD2
+phaseFlash	KEYWORD2
+setMaxPhase	KEYWORD2
+setPhase	KEYWORD2
+readButton	KEYWORD2
+getdurration	KEYWORD2
+setFlashtime	KEYWORD2
+checkShutoff	KEYWORD2
+lightOperation	KEYWORD2
+setFlashlight	KEYWORD2
+setShutoffTime	KEYWORD2
+getLightPhase	KEYWORD2
+setButtonDuration	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)

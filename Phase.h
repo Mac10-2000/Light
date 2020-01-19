@@ -1,27 +1,12 @@
 /**************************************************************************/
 /*!
-  @file Adafruit_GPS.h
+Phase class for the Light Library
 
-  This is the Adafruit GPS library - the ultimate GPS library
-  for the ultimate GPS module!
+takes specific lights and makes them act in unison,also saves the duration of the phase
 
-  Tested and works great with the Adafruit Ultimate GPS module
-  using MTK33x9 chipset
-      ------> http://www.adafruit.com/products/746
-  Pick one up today at the Adafruit electronics shop
-  and help support open source hardware & software! -ada
-
-  Adafruit invests time and resources providing this open source code,
-  please support Adafruit and open-source hardware by purchasing
-  products from Adafruit!
-
-  Written by Limor Fried/Ladyada  for Adafruit Industries.
-  BSD license, check license.txt for more information
-  All text above must be included in any redistribution
 */
 /**************************************************************************/
 
-// Fllybob added lines 34,35 and 40,41 to add 100mHz logging capability
 
 #ifndef _Phase_H
 #define _Phase_H
@@ -32,25 +17,24 @@
 
 class Phase {
 	public :
-	Phase(Light *light1,Light *light2, int time);
-	Phase(Light *light1, int time);
-	Phase(Light **lights,int numLights, int time);
-	Phase(Light *light1,Light *light2,Light *light3, int time);
-	Phase( int time);
-	void lowAll(void);
-	void highAll(void);
-	void invertAll(void);
-	int getdurration(void);
+	Phase( int time);//Constructor for zero Lights
+	Phase(Light *light1, int time);//Constructor for 1 Lights
+	Phase(Light *light1,Light *light2, int time);//Constructor for 2 Lights
+	Phase(Light *light1,Light *light2,Light *light3, int time);//Constructor for 3 Lights
+	void lowAll(void); // function to shutoff all Lights in the phase
+	void highAll(void);// function to turn on all Lights in the phase
+	void invertAll(void);// function toinvert all Lights in the phase
+	int getdurration(void); // getter for the _time variable
 	
 	private:
 	
 	
-	int _numLights;
+	int _numLights; //saves the number of Lights in the phase
 
-	Light * _light1;
+	Light * _light1;  
 	Light * _light2;
 	Light * _light3;
-	int _time;
+	int _time;  // saves the duration of the phase
 
 };
 /**************************************************************************/
