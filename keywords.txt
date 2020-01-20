@@ -39,6 +39,7 @@ lightOperation	KEYWORD2
 setFlashlight	KEYWORD2
 setShutoffTime	KEYWORD2
 getLightPhase	KEYWORD2
+runLightIntern	KEYWORD2
 setButtonDuration	KEYWORD2
 
 #######################################
