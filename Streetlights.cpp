@@ -179,13 +179,12 @@ if(mode > -1){
 }
 if(timer > 0){
 	_lightTimer=timer;
-}Serial.println(phase);
+}
 if(phase > 0){
 	_lightPhase=phase;
-	_stopLight=stopLight;Serial.println(_lightPhase);
+	_stopLight=stopLight;
 }
-Serial.println(stopLight);
-Serial.println(_stopLight);
+
 
 
 
